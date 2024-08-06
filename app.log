@@ -1,0 +1,14 @@
+2024-08-07 02:51:39,448 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-08-07 02:51:39,449 - [33mPress CTRL+C to quit[0m
+2024-08-07 02:53:45,484 - 127.0.0.1 - - [07/Aug/2024 02:53:45] "GET /config/spinner HTTP/1.1" 200 -
+2024-08-07 02:53:56,910 - 127.0.0.1 - - [07/Aug/2024 02:53:56] "PUT /config/spinner HTTP/1.1" 200 -
+2024-08-07 02:54:01,031 - 127.0.0.1 - - [07/Aug/2024 02:54:01] "GET /config/spinner HTTP/1.1" 200 -
+2024-08-07 03:02:26,158 - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-08-07 03:02:26,162 - [33mPress CTRL+C to quit[0m
+2024-08-07 03:03:19,096 - 127.0.0.1 - - [07/Aug/2024 03:03:19] "[33mPUT /config/spinner%20-d%20%22kims_dots%22 HTTP/1.1[0m" 404 -
+2024-08-07 03:04:19,833 - 127.0.0.1 - - [07/Aug/2024 03:04:19] "PUT /config/spinner HTTP/1.1" 200 -
+2024-08-07 03:05:20,788 - 127.0.0.1 - - [07/Aug/2024 03:05:20] "GET /config/spinner HTTP/1.1" 200 -
+2024-08-07 03:05:34,582 - 127.0.0.1 - - [07/Aug/2024 03:05:34] "PUT /config/spinner HTTP/1.1" 200 -
+2024-08-07 03:05:38,750 - 127.0.0.1 - - [07/Aug/2024 03:05:38] "GET /config/spinner HTTP/1.1" 200 -

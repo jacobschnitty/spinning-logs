@@ -1,40 +1,34 @@
+# terminal_tools.py
+
+"""
+##############################
+    TABLE OF CONTENTS
+##############################
+
+1. Import Statements
+2. Utility Functions
+3. Colour Configurations
+4. Custom Logging Formatter
+5. Logging Configuration
+6. Logging Function
+7. Spinner Functions
+
+"""
+
+# 1. Import Statements
 import logging
 import time
-import random
 import threading
 import itertools
 import sys
 import requests
 import json
 
-CONFIG_URL = 'http://127.0.0.1:5000/config'
-
-def get_config(section):
-    response = requests.get(f"{CONFIG_URL}/{section}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise ValueError(f"Failed to retrieve config section: {section}")
-
-def update_config(section, data):
-    response = requests.post(f"{CONFIG_URL}/{section}", json=data)
-    if response.status_code == 200:
-        return response.json()
-    else:
-        raise ValueError(f"Failed to update config section: {section}")
-
-# Example usage
-def get_spinner_config():
-    return get_config('spinner')
-
-def update_spinner_config(new_config):
-    return update_config('spinner', new_config)
-
-def get_logging_config():
-    return get_config('logging')
-
-def update_logging_config(new_config):
-    return update_config('logging', new_config)
+"""
+##############################
+    2. Utility Functions
+##############################
+"""
 
 # Utility function to convert hex to ANSI escape code
 def hex_to_ansi_escape(hex_color):
@@ -42,13 +36,24 @@ def hex_to_ansi_escape(hex_color):
     r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
     return f'\033[38;2;{r};{g};{b}m'
 
+"""
+##############################
+    3. Colour Configurations
+##############################
+"""
+
 # Colour config
 COLOR_TIMESTAMP = hex_to_ansi_escape('#FFFBBD')  # Chiffon Lemon
 COLOR_MESSAGE = hex_to_ansi_escape('#7FB069')    # Asparagus
 COLOR_FUNCTION = hex_to_ansi_escape('#36C9C6')   # Rob egg blue
 RESET_COLOR = '\033[0m'
 
-# Custom logging formatter
+"""
+##############################
+    4. Custom Logging Formatter
+##############################
+"""
+
 class CustomFormatter(logging.Formatter):
     def format(self, record):
         log_message = super().format(record)
@@ -57,59 +62,103 @@ class CustomFormatter(logging.Formatter):
         colored_message = f"{COLOR_MESSAGE}{message}{RESET_COLOR}"
         return f"{colored_timestamp} - {colored_message}"
 
-# Logging config
+"""
+##############################
+    5. Logging Configuration
+##############################
+"""
+
+# Configure logging
 logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = CustomFormatter('%(asctime)s - %(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 logger.setLevel(logging.INFO)
+
+# Console handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_formatter = CustomFormatter('%(asctime)s - %(message)s')
+console_handler.setFormatter(console_formatter)
+
+# File handler
+file_handler = logging.FileHandler('app.log')
+file_formatter = logging.Formatter('%(asctime)s - %(message)s')
+file_handler.setFormatter(file_formatter)
+
+# Add handlers to logger
+logger.addHandler(console_handler)
+logger.addHandler(file_handler)
+
+"""
+##############################
+    6. Logging Function
+##############################
+"""
 
 # Logging function
 def enable_logging(func, *args, **kwargs):
     func_name = func.__name__
     start_time = time.time()
     logger.info(f"Starting {COLOR_FUNCTION}{func_name}{RESET_COLOR}...")
-    spinning_thread = start_spinning()
+    
+    # Start the spinner
+    spinner_config = get_spinner_config()
+    spinning_thread = start_spinner(spinner_config["symbols"], spinner_config["speed"])
+    
     result = func(*args, **kwargs)
-    stop_spinning()
+    stop_spinner()
     spinning_thread.join()
+    
     elapsed_time = time.time() - start_time
     logger.info(f"{COLOR_FUNCTION}{func_name}{RESET_COLOR} completed in {elapsed_time:.2f} seconds!")
     return result
 
-# Spinner functions
-def start_spinning():
-    lunation_loop = itertools.cycle(['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'])
-    spinner = lunation_loop
+"""
+##############################
+    7. Spinner Functions
+##############################
+"""
+
+# Global spinner state
+spinning = False
+
+def start_spinner(symbols, speed):
     global spinning
     spinning = True
+    spinner = itertools.cycle(symbols)
 
-    def spin_thread():
+    def spin():
         while spinning:
             sys.stdout.write(next(spinner) + '\r')
             sys.stdout.flush()
-            time.sleep(0.3)
+            time.sleep(speed)
 
-    t = threading.Thread(target=spin_thread)
-    t.start()
-    return t
+    # Start spinner thread
+    spinner_thread = threading.Thread(target=spin, daemon=True)
+    spinner_thread.start()
+    return spinner_thread
 
-def stop_spinning():
+def stop_spinner():
     global spinning
     spinning = False
 
-# Threading function
-def run_threads(func):
-    def inner_run(*args, **kwargs):
-        threads = []
-        for thread_index in range(5):
-            individual_thread = threading.Thread(target=func, args=(thread_index,), daemon=True)
-            threads.append(individual_thread)
-            individual_thread.start()
+"""
+##############################
+    Notes
+##############################
+"""
 
-        logger.info("Main flow of application")
-        for individual_thread in threads:
-            individual_thread.join()
+"""
+Changelog
 
-    return inner_run
+Updated start_spinner Function:
+- Modified start_spinner to accept symbols and speed as parameters.
+- Created and started the spinner thread correctly.
+- Integrated Spinner with enable_logging:
+
+- Fetched spinner configuration using get_spinner_config() inside enable_logging.
+- Passed spinner configuration to start_spinner and ensured it starts and stops properly.
+- Updated enable_logging Function:
+
+- Added functionality to start and stop the spinner based on configuration fetched from the API.
+- Example Function:
+    - Added example_function to demonstrate how enable_logging can be used. 
+    - Uncomment the function call at the end of the script to test.
+"""

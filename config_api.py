@@ -1,10 +1,11 @@
-import subprocess
+# config_api.py
+
 import threading
 import itertools
 import sys
 import time
-import importlib.util
-import version
+from terminal_tools import start_spinner, stop_spinner
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
@@ -31,16 +32,13 @@ symbol_sets = {
 @app.route('/config/spinner', methods=['PUT'])
 def update_spinner_config():
     global config_data
-    new_config = request.json
-    name = new_config.get("name")
-    symbols = new_config.get("symbols")
-    speed = new_config.get("speed")
+    name = request.data.decode('utf-8')  # Change: Simplified input handling to plain text
     
-    if name in symbol_sets and symbols == symbol_sets[name] and speed is not None:
+    if name in symbol_sets:
         config_data["spinners"] = {
             "name": name,
-            "symbols": symbols,
-            "speed": speed
+            "symbols": symbol_sets[name],
+            "speed": config_data["spinners"].get("speed", 0.3)
         }
         return jsonify({"message": "Configuration updated successfully"}), 200
     else:
@@ -66,7 +64,6 @@ RESET_COLOR = '\033[0m'
 def print_routes():
     print(f"{COLOR_AVAILABLE_ROUTES}Available routes:{RESET_COLOR}")
     for rule in app.url_map.iter_rules():
-        # Create a list of method colors
         method_colors = []
         for method in rule.methods:
             if method == 'HEAD':
@@ -76,9 +73,7 @@ def print_routes():
             elif method == 'GET':
                 method_colors.append(COLOR_GET + method + RESET_COLOR)
             else:
-                method_colors.append(method)  # No color for other methods
-        
-        # Join the method colors into a single string
+                method_colors.append(method)
         methods = ', '.join(method_colors)
         path = f"{rule.rule}"
         print(f"{RESET_COLOR}{rule.endpoint:20} {methods:20} {COLOR_PATH}{path}{RESET_COLOR}")
@@ -93,16 +88,15 @@ def start_spinner():
             sys.stdout.flush()
             time.sleep(config_data["spinners"]["speed"])
     
-    # Start spinner in a separate thread
     threading.Thread(target=spin, daemon=True).start()
 
 if __name__ == '__main__':
-    # Print routes once during server startup
     print_routes()
     
-    # Start the spinner
     start_spinner()
     
-    # Run the Flask app
     print(f"* Running on http://127.0.0.1:5000")
-    app.run(debug=True, use_reloader=False)  # Disable reloader to avoid duplicate printing
+    try:
+        app.run(debug=True, use_reloader=False)
+    finally:
+        stop_spinner()
