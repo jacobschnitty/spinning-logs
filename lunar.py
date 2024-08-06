@@ -1,4 +1,9 @@
-import threading, itertools, sys, time
+# lunar.py
+
+import itertools
+import sys
+import time
+import threading
 
 def start_spinning():
     # Define the spinner symbols in ASCII 

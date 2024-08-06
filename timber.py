@@ -1,6 +1,7 @@
-# timber 10:15pm
+# timber.py 10:15pm
 
-import logging, time
+import logging
+import time
 
 # Utility function to convert hex to ANSI escape code
 def hex_to_ansi_escape(hex_color):
