@@ -1,3 +1,7 @@
+import threading
+import itertools
+import sys
+import time
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -77,6 +81,26 @@ def print_routes():
         path = f"{rule.rule}"
         print(f"{RESET_COLOR}{rule.endpoint:20} {methods:20} {COLOR_PATH}{path}{RESET_COLOR}")
 
+def start_spinner():
+    lunation_loop = itertools.cycle(config_data["spinners"]["symbols"])
+    spinner = lunation_loop
+    
+    def spin():
+        while True:
+            sys.stdout.write(next(spinner) + '\r')
+            sys.stdout.flush()
+            time.sleep(config_data["spinners"]["speed"])
+    
+    # Start spinner in a separate thread
+    threading.Thread(target=spin, daemon=True).start()
+
 if __name__ == '__main__':
-    print_routes()  # Print routes before starting the server
-    app.run(debug=True)
+    # Print routes once during server startup
+    print_routes()
+    
+    # Start the spinner
+    start_spinner()
+    
+    # Run the Flask app
+    print(f"* Running on http://127.0.0.1:5000")
+    app.run(debug=True, use_reloader=False)  # Disable reloader to avoid duplicate printing
