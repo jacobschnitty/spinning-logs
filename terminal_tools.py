@@ -4,6 +4,37 @@ import random
 import threading
 import itertools
 import sys
+import requests
+import json
+
+CONFIG_URL = 'http://127.0.0.1:5000/config'
+
+def get_config(section):
+    response = requests.get(f"{CONFIG_URL}/{section}")
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise ValueError(f"Failed to retrieve config section: {section}")
+
+def update_config(section, data):
+    response = requests.post(f"{CONFIG_URL}/{section}", json=data)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise ValueError(f"Failed to update config section: {section}")
+
+# Example usage
+def get_spinner_config():
+    return get_config('spinner')
+
+def update_spinner_config(new_config):
+    return update_config('spinner', new_config)
+
+def get_logging_config():
+    return get_config('logging')
+
+def update_logging_config(new_config):
+    return update_config('logging', new_config)
 
 # Utility function to convert hex to ANSI escape code
 def hex_to_ansi_escape(hex_color):

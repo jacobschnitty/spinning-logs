@@ -1,0 +1,13 @@
+{
+    "spinner": {
+        "symbols": ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"],
+        "speed": 0.3
+    },
+    "logging": {
+        "colors": {
+            "timestamp": "#FFFBBD",
+            "message": "#7FB069",
+            "function": "#36C9C6"
+        }
+    }
+}
