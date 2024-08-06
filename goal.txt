@@ -1,0 +1,5 @@
+I want to make a progress indicator in python using emojis. 
+I'd like to indicate progress with an animation. 
+To start, just using ASCII characters with . .. ... .... as a box
+Then, with moon ejois. 
+
